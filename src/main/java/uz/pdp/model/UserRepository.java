@@ -14,6 +14,21 @@ public class UserRepository {
             "SELECT * FROM botusers WHERE chat_id = ?";
     private final String updateLang =
             "UPDATE botusers SET lang = ? WHERE chat_id = ?";
+    private final String updateState = "UPDATE botusers SET bot_state = ? WHERE chat_id = ?";
+
+    public void updateBotState(String chatId, BotState state){
+        try{
+            Connection conn = CustomDataSource.getInstance().getConnection();
+            PreparedStatement ps = conn.prepareStatement(updateState);
+
+            ps.setString(1,state.name());
+            ps.setString(2,chatId);
+
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public void updateLang(String chatId, String lang){
         try{
@@ -22,11 +37,14 @@ public class UserRepository {
 
             ps.setString(1,lang);
             ps.setString(2,chatId);
+
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+
 
     public void insertUser(String chatId, BotState botState) {
         try {
