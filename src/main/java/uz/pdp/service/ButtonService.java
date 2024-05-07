@@ -63,4 +63,17 @@ public class ButtonService {
 
         return markup1;
     }
+
+    public ReplyKeyboardMarkup backMenu(){
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> rowList = new ArrayList<>();
+        KeyboardRow row = new KeyboardRow();
+        KeyboardButton button = new KeyboardButton();
+        button.setText("Ortga");
+        row.add(button);
+        rowList.add(row);
+        markup.setKeyboard(rowList);
+        markup.setResizeKeyboard(true);
+        return markup;
+    }
 }

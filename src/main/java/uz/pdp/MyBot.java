@@ -30,7 +30,7 @@ public class MyBot extends TelegramLongPollingBot {
                 if (userRepository.getUserByChatId(chatId) == null) {
                     userRepository.insertUser(chatId, BotState.MAIN_PAGE);
                 }
-                userRepository.updateBotState(chatId,BotState.MAIN_PAGE);
+                userRepository.updateBotState(chatId, BotState.MAIN_PAGE);
                 SendMessage message = new SendMessage();
                 message.setText("Xush kelibsiz. Tilni tanlang");
                 message.setChatId(chatId);
@@ -48,56 +48,76 @@ public class MyBot extends TelegramLongPollingBot {
                 }
             } else {
                 User user = userRepository.getUserByChatId(chatId);
-                if (user.getBotState() == BotState.MAIN_PAGE) {
-                    if (text.equals("O'zbek tili")) {
-                        userRepository.updateLang(chatId, "uz");
-                        userRepository.updateBotState(chatId, BotState.UZ_PAGE);
+                switch (user.getBotState()) {
+                    case MAIN_PAGE -> {
+                        if (text.equals("O'zbek tili")) {
+                            userRepository.updateLang(chatId, "uz");
+                            userRepository.updateBotState(chatId, BotState.UZ_PAGE);
+                            SendMessage message = new SendMessage();
+                            message.setText("O'zbek tili tanlandi");
+                            message.setChatId(chatId);
+                            message.setReplyMarkup(buttonService.mainMenuUz());
+                            try {
+                                execute(message);
+                            } catch (TelegramApiException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else if (text.equals("Rus tili")) {
+                            userRepository.updateLang(chatId, "ru");
+                            userRepository.updateBotState(chatId, BotState.RU_PAGE);
+                            SendMessage message = new SendMessage();
+                            message.setText("Rus tili tanlandi");
+                            message.setReplyMarkup(buttonService.mainMenuRu());
+                            message.setChatId(chatId);
+                            try {
+                                execute(message);
+                            } catch (TelegramApiException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                    case UZ_PAGE -> {
                         SendMessage message = new SendMessage();
-                        message.setText("O'zbek tili tanlandi");
-                        message.setChatId(chatId);
-                        message.setReplyMarkup(buttonService.mainMenuUz());
+                        if (text.equals("Mening profilim")) {
+                            userRepository.updateBotState(chatId, BotState.MY_PROFILE);
+                            message.setText("Mening profilim tanlandi");
+                            message.setChatId(chatId);
+                            message.setReplyMarkup(buttonService.backMenu());
+                        } else if (text.equals("Sozlamalar")) {
+                            message.setText("Sozlamalar tanlandi");
+                            message.setChatId(chatId);
+                        } else if (text.equals("Do'stlarga ulashish")) {
+                            message.setText("Do'stlarga ulashish tanlandi");
+                            message.setChatId(chatId);
+                        }
                         try {
                             execute(message);
                         } catch (TelegramApiException e) {
                             throw new RuntimeException(e);
                         }
-                    } else if (text.equals("Rus tili")) {
-                        userRepository.updateLang(chatId, "ru");
-                        userRepository.updateBotState(chatId, BotState.RU_PAGE);
-                        SendMessage message = new SendMessage();
-                        message.setText("Rus tili tanlandi");
-                        message.setReplyMarkup(buttonService.mainMenuRu());
-                        message.setChatId(chatId);
-                        try {
-                            execute(message);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
+                    }
+                    case RU_PAGE -> {
+                        if (text.equals("мой профиль")) {
+
+                        } else if (text.equals("настройки")) {
+
+                        } else if (text.equals("Поделиться с друзьями")) {
+
                         }
                     }
-                } else if (user.getBotState() == BotState.UZ_PAGE) {
-                    SendMessage message = new SendMessage();
-                    if (text.equals("Mening profilim")){
-                        message.setText("Mening profilim tanlandi");
-                        message.setChatId(chatId);
-                    } else if (text.equals("Sozlamalar")) {
-                        message.setText("Sozlamalar tanlandi");
-                        message.setChatId(chatId);
-                    } else if (text.equals("Do'stlarga ulashish")) {
-                        message.setText("Do'stlarga ulashish tanlandi");
-                        message.setChatId(chatId);
-                    }
-                    try {
-                        execute(message);
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else if (user.getBotState() == BotState.RU_PAGE) {
-                    if (text.equals("мой профиль")){
-
-                    } else if (text.equals("настройки")) {
-
-                    } else if (text.equals("Поделиться с друзьями")) {
-
+                    case MY_PROFILE -> {
+                        if (text.equals("Ortga")) {
+                            userRepository.updateBotState(chatId,BotState.UZ_PAGE);
+                            SendMessage message = new SendMessage();
+                            message.setText("Quyidagilardan birini tanlang");
+                            message.setChatId(chatId);
+                            message.setReplyMarkup(buttonService.mainMenuUz());
+                            try {
+                                execute(message);
+                            } catch (TelegramApiException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                     }
                 }
             }
@@ -111,29 +131,5 @@ public class MyBot extends TelegramLongPollingBot {
 
     public MyBot(String botToken) {
         super(botToken);
-    }
-
-    private ReplyKeyboardMarkup menuUz(){
-        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> rowList = new ArrayList<>();
-
-        KeyboardButton button1 = new KeyboardButton();
-        button1.setText("Mening profilim");
-
-        KeyboardButton button2 = new KeyboardButton();
-        button2.setText("Sozlamalar");
-
-        KeyboardButton button3 = new KeyboardButton();
-        button3.setText("Do'stlarga ulashish");
-
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(button1);
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(button2);
-        row2.add(button3);
-        rowList.add(row1);
-        rowList.add(row2);
-        markup.setKeyboard(rowList);
-        return markup;
     }
 }
